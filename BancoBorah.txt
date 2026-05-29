@@ -1,0 +1,82 @@
+-- Tabela de Categorias
+CREATE TABLE categorias (
+    catid INT PRIMARY KEY AUTO_INCREMENT,
+    catnome VARCHAR (100) NOT NULL
+);
+
+-- Tabela de Produtos (pastéis, bebidas, adicionais)
+CREATE TABLE produtos (
+    proid INT PRIMARY KEY AUTO_INCREMENT,
+    pronome VARCHAR (100) NOT NULL,
+    prodescricao VARCHAR (100),
+    propreco REAL NOT NULL,
+    procatid INT,
+    profot LONGBLOB,
+    proespecial_do_dia BOOLEAN DEFAULT 0,
+    proativo BOOLEAN DEFAULT 1,
+    FOREIGN KEY (procatid) REFERENCES categorias(catid)
+);
+
+-- Tabela de Usuários (admin, atendente, etc)
+CREATE TABLE usuarios (
+    usuid INT PRIMARY KEY AUTO_INCREMENT,
+    usunome VARCHAR (100) NOT NULL,
+    usuemail VARCHAR (100) UNIQUE,
+    ususenha VARCHAR (100) NOT NULL,
+    usutipo VARCHAR (100) NOT NULL -- admin, atendente, etc
+);
+
+-- Tabela de Clientes
+CREATE TABLE clientes (
+    cliid INT PRIMARY KEY AUTO_INCREMENT,
+    clinome VARCHAR (100) NOT NULL,
+    clitelefone VARCHAR (100),
+    cliemail VARCHAR (100)
+);
+
+-- Tabela de Pedidos
+CREATE TABLE pedidos (
+    pedid INT PRIMARY KEY AUTO_INCREMENT,
+    pedcliid INT,
+    pedcaiid INT,
+    pedtipo VARCHAR (100) NOT NULL, -- mesa, retirada
+    pedstatus VARCHAR (100) , -- pendente, preparando, pronto, entregue
+    pedvalor REAL,
+    peddata_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    pedtempo_estimado INT, -- em minutos
+    pedmesa_numero INT,
+    FOREIGN KEY (pedcliid) REFERENCES clientes(cliid),
+    FOREIGN KEY (pedcaiid) REFERENCES caixa(caiid)
+);
+
+-- Itens do Pedido
+CREATE TABLE itens_pedidos (
+    iteid INT PRIMARY KEY AUTO_INCREMENT,
+    itepedid INT,
+    iteproid INT,
+    itequantidade INT NOT NULL,
+    itepreco REAL NOT NULL,
+    iteobservacao VARCHAR (100),
+    FOREIGN KEY (itepedid) REFERENCES pedidos(pedid),
+    FOREIGN KEY (iteproid) REFERENCES produtos(proid)
+);
+
+-- Pagamentos
+CREATE TABLE pagamentos (
+    pagid INT PRIMARY KEY AUTO_INCREMENT,
+    pagpedid INT,
+    pagforma VARCHAR (100) NOT NULL, -- dinheiro, pix, cartão
+    pagvalor REAL NOT NULL,
+    pagdata_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (pagpedid) REFERENCES pedidos(pedid)
+);
+
+-- Caixa (controle financeiro diário)
+CREATE TABLE caixa (
+    caiid INT PRIMARY KEY AUTO_INCREMENT,
+    caidata DATE NOT NULL,
+    caitroco REAL NOT NULL,
+    caitotal REAL,
+    caiusuid INT,
+    FOREIGN KEY (caiusuid) REFERENCES usuarios(usuid)
+);
